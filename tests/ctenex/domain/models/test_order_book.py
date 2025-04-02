@@ -4,7 +4,8 @@ from uuid import UUID, uuid4
 import pytest
 
 from ctenex.domain.contracts import ContractCode
-from ctenex.domain.order.model import Order, OrderSide, OrderStatus, OrderType
+from ctenex.domain.entities import OrderSide, OrderType, ProcessedOrderStatus
+from ctenex.domain.order.model import Order
 from ctenex.domain.order_book import OrderBook
 
 
@@ -146,7 +147,7 @@ class TestOrderBook:
         # Validation
         if cancelled_order:
             assert cancelled_order == sample_limit_buy_order
-            assert cancelled_order.status == OrderStatus.CANCELLED
+            assert cancelled_order.status == ProcessedOrderStatus.CANCELLED
         assert order_id not in self.order_book.orders_by_id
         assert sample_limit_buy_order not in self.order_book.bid_queues[100.0]
         assert -100.0 not in self.order_book.bids
@@ -163,7 +164,7 @@ class TestOrderBook:
         # Validation
         if cancelled_order:
             assert cancelled_order == sample_limit_sell_order
-            assert cancelled_order.status == OrderStatus.CANCELLED
+            assert cancelled_order.status == ProcessedOrderStatus.CANCELLED
         assert order_id not in self.order_book.orders_by_id
         assert sample_limit_sell_order not in self.order_book.ask_queues[101.0]
         assert 101.0 not in self.order_book.asks

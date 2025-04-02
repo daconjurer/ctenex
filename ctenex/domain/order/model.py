@@ -1,27 +1,15 @@
 from datetime import UTC, datetime
-from enum import Enum
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from ctenex.domain.contracts import ContractCode
-
-
-class OrderSide(str, Enum):
-    BUY = "buy"
-    SELL = "sell"
-
-
-class OrderType(str, Enum):
-    LIMIT = "limit"
-    MARKET = "market"
-
-
-class OrderStatus(str, Enum):
-    OPEN = "open"
-    FILLED = "filled"
-    PARTIALLY_FILLED = "partially_filled"
-    CANCELLED = "cancelled"
+from ctenex.domain.entities import (
+    OpenOrderStatus,
+    OrderSide,
+    OrderStatus,
+    OrderType,
+)
 
 
 class Order(BaseModel):
@@ -36,7 +24,7 @@ class Order(BaseModel):
     quantity: float
     remaining_quantity: float | None = Field(default=None)
     created_at: datetime = Field(default=datetime.now(UTC))
-    status: OrderStatus = Field(default=OrderStatus.OPEN)
+    status: OrderStatus = Field(default=OpenOrderStatus.OPEN)
 
     model_config = ConfigDict(
         json_schema_extra={

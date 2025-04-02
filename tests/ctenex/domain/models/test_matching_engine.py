@@ -2,8 +2,14 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from ctenex.domain.contracts import ContractCode
+from ctenex.domain.entities import (
+    OpenOrderStatus,
+    OrderSide,
+    OrderType,
+    ProcessedOrderStatus,
+)
 from ctenex.domain.matching_engine import MatchingEngine
-from ctenex.domain.order.model import Order, OrderSide, OrderStatus, OrderType
+from ctenex.domain.order.model import Order
 from tests.fixtures import (  # noqa F401
     limit_buy_order,
     limit_sell_order,
@@ -35,7 +41,7 @@ class TestMatchingEngine:
 
         # Validation
         assert limit_buy_order.id == order_id
-        assert limit_buy_order.status == OrderStatus.OPEN
+        assert limit_buy_order.status == OpenOrderStatus.OPEN
         assert limit_buy_order.remaining_quantity == limit_buy_order.quantity
         assert limit_buy_order in self.matching_engine.get_orders(
             ContractCode.UK_BL_MAR_25
@@ -55,7 +61,7 @@ class TestMatchingEngine:
 
         # Validation
         assert limit_sell_order.id == order_id
-        assert limit_sell_order.status == OrderStatus.OPEN
+        assert limit_sell_order.status == OpenOrderStatus.OPEN
         assert limit_sell_order.remaining_quantity == limit_sell_order.quantity
         assert limit_sell_order in self.matching_engine.get_orders(
             ContractCode.UK_BL_MAR_25
@@ -77,8 +83,8 @@ class TestMatchingEngine:
 
         # Validation
         assert limit_sell_order.id == order_id
-        assert limit_buy_order.status == OrderStatus.FILLED
-        assert limit_sell_order.status == OrderStatus.FILLED
+        assert limit_buy_order.status == ProcessedOrderStatus.FILLED
+        assert limit_sell_order.status == ProcessedOrderStatus.FILLED
         assert limit_buy_order.remaining_quantity == 0
         assert limit_sell_order.remaining_quantity == 0
 
@@ -101,8 +107,8 @@ class TestMatchingEngine:
 
         # Validation
         assert limit_sell_order.id == order_id
-        assert limit_buy_order.status == OrderStatus.PARTIALLY_FILLED
-        assert limit_sell_order.status == OrderStatus.FILLED
+        assert limit_buy_order.status == OpenOrderStatus.PARTIALLY_FILLED
+        assert limit_sell_order.status == ProcessedOrderStatus.FILLED
         assert limit_buy_order.remaining_quantity == 5.0
         assert limit_sell_order.remaining_quantity == 0
 
@@ -129,11 +135,10 @@ class TestMatchingEngine:
 
         # Validation
         assert second_limit_sell_order.id == order_id
-        assert limit_buy_order.status == OrderStatus.FILLED
-        assert second_limit_sell_order.status == OrderStatus.PARTIALLY_FILLED
-        assert limit_buy_order.status == OrderStatus.FILLED
-        assert second_limit_sell_order.remaining_quantity == 5.0
+        assert limit_buy_order.status == ProcessedOrderStatus.FILLED
+        assert second_limit_sell_order.status == OpenOrderStatus.PARTIALLY_FILLED
         assert limit_buy_order.remaining_quantity == 0
+        assert second_limit_sell_order.remaining_quantity == 5.0
 
         # Buy order should remain in the book
         orders = self.matching_engine.get_orders(ContractCode.UK_BL_MAR_25)
@@ -163,8 +168,8 @@ class TestMatchingEngine:
 
         # Validation
         assert market_order.id == order_id
-        assert market_order.status == OrderStatus.FILLED
-        assert limit_sell_order.status == OrderStatus.FILLED
+        assert market_order.status == ProcessedOrderStatus.FILLED
+        assert limit_sell_order.status == ProcessedOrderStatus.FILLED
 
         # Book should be empty
         assert len(self.matching_engine.get_orders(ContractCode.UK_BL_MAR_25)) == 0
@@ -192,8 +197,8 @@ class TestMatchingEngine:
 
         # Validation
         assert market_order.id == order_id
-        assert market_order.status == OrderStatus.FILLED
-        assert limit_buy_order.status == OrderStatus.PARTIALLY_FILLED
+        assert market_order.status == ProcessedOrderStatus.FILLED
+        assert limit_buy_order.status == OpenOrderStatus.PARTIALLY_FILLED
         assert limit_buy_order.remaining_quantity == 5.0
 
     def test_match_multiple_orders(self):
@@ -238,9 +243,9 @@ class TestMatchingEngine:
 
         # Validation
         assert buy_order.id == order_id
-        assert sell1.status == OrderStatus.FILLED
-        assert sell2.status == OrderStatus.PARTIALLY_FILLED
-        assert buy_order.status == OrderStatus.FILLED
+        assert sell1.status == ProcessedOrderStatus.FILLED
+        assert sell2.status == OpenOrderStatus.PARTIALLY_FILLED
+        assert buy_order.status == ProcessedOrderStatus.FILLED
         assert buy_order.remaining_quantity == 0
 
     def test_price_time_priority_matching(self):
@@ -285,9 +290,9 @@ class TestMatchingEngine:
 
         # Validation
         assert buy_order.id == order_id
-        assert sell1.status == OrderStatus.FILLED
-        assert sell2.status == OrderStatus.PARTIALLY_FILLED
-        assert buy_order.status == OrderStatus.FILLED
+        assert sell1.status == ProcessedOrderStatus.FILLED
+        assert sell2.status == OpenOrderStatus.PARTIALLY_FILLED
+        assert buy_order.status == ProcessedOrderStatus.FILLED
         assert buy_order.remaining_quantity == 0.0
 
     def test_get_trades(
@@ -340,8 +345,8 @@ class TestMatchingEngine:
 
         # Validation
         assert buy_order.id == order_id
-        assert buy_order.status == OrderStatus.OPEN
-        assert sell_order.status == OrderStatus.OPEN
+        assert buy_order.status == OpenOrderStatus.OPEN
+        assert sell_order.status == OpenOrderStatus.OPEN
         assert buy_order.remaining_quantity == 5.0
         assert sell_order.remaining_quantity == 5.0
 
@@ -383,8 +388,8 @@ class TestMatchingEngine:
 
         # Validation
         assert sell_order.id == order_id
-        assert buy_order.status == OrderStatus.OPEN
-        assert sell_order.status == OrderStatus.OPEN
+        assert buy_order.status == OpenOrderStatus.OPEN
+        assert sell_order.status == OpenOrderStatus.OPEN
         assert buy_order.remaining_quantity == 5.0
         assert sell_order.remaining_quantity == 5.0
 

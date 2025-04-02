@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Request
 
 from ctenex.domain.contracts import ContractCode
-from ctenex.domain.order.model import Order, OrderStatus
+from ctenex.domain.order.model import OpenOrderStatus, Order
 from ctenex.domain.order.schemas import OrderAddRequest, OrderAddResponse
 
 router = APIRouter(tags=["exchange"])
@@ -20,7 +20,7 @@ async def place_order(
     return OrderAddResponse(
         **body.model_dump(),
         id=order_id,
-        status=OrderStatus.OPEN,
+        status=OpenOrderStatus.OPEN,
     )
 
 
