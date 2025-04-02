@@ -2,7 +2,8 @@ from datetime import datetime
 from uuid import UUID
 
 from ctenex.domain.contracts import ContractCode
-from ctenex.domain.order.model import Order, OrderSide, OrderStatus, OrderType
+from ctenex.domain.entities import OpenOrderStatus, OrderSide, OrderType
+from ctenex.domain.order.model import Order
 
 
 class TestOrder:
@@ -25,5 +26,5 @@ class TestOrder:
         assert order.price == 152.50
         assert order.quantity == 5.0
         assert isinstance(order.created_at, datetime)
-        assert order.status == OrderStatus.OPEN
+        assert order.status == OpenOrderStatus.OPEN
         assert order.remaining_quantity == 5.0

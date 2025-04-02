@@ -4,7 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.testclient import TestClient
 
 from ctenex.domain.contracts import ContractCode
-from ctenex.domain.order.model import OrderSide, OrderStatus, OrderType
+from ctenex.domain.entities import OpenOrderStatus, OrderSide, OrderType
 from ctenex.domain.order.schemas import OrderAddRequest
 from tests.fixtures import (
     client,  # noqa F401
@@ -52,7 +52,7 @@ class TestOrdersController:
         assert payload["order_type"] == order_request.order_type
         assert payload["price"] == order_request.price
         assert payload["quantity"] == order_request.quantity
-        assert payload["status"] == OrderStatus.OPEN
+        assert payload["status"] == OpenOrderStatus.OPEN
 
     def test_add_limit_sell_order(
         self,
@@ -86,7 +86,7 @@ class TestOrdersController:
         assert payload["order_type"] == order_request.order_type
         assert payload["price"] == order_request.price
         assert payload["quantity"] == order_request.quantity
-        assert payload["status"] == OrderStatus.OPEN
+        assert payload["status"] == OpenOrderStatus.OPEN
 
     def test_add_market_buy_order(
         self,
@@ -119,7 +119,7 @@ class TestOrdersController:
         assert payload["order_type"] == order_request.order_type
         assert payload["price"] == order_request.price
         assert payload["quantity"] == order_request.quantity
-        assert payload["status"] == OrderStatus.OPEN
+        assert payload["status"] == OpenOrderStatus.OPEN
 
     def test_add_market_sell_order(
         self,
@@ -152,7 +152,7 @@ class TestOrdersController:
         assert payload["order_type"] == order_request.order_type
         assert payload["price"] == order_request.price
         assert payload["quantity"] == order_request.quantity
-        assert payload["status"] == OrderStatus.OPEN
+        assert payload["status"] == OpenOrderStatus.OPEN
 
     # GET /orders
 
@@ -222,4 +222,4 @@ class TestOrdersController:
         assert payload[0]["price"] == order_request_1.price
         assert payload[0]["quantity"] == 10.0
         assert payload[0]["remaining_quantity"] == 8.0
-        assert payload[0]["status"] == OrderStatus.PARTIALLY_FILLED
+        assert payload[0]["status"] == OpenOrderStatus.PARTIALLY_FILLED
