@@ -3,7 +3,8 @@ from uuid import UUID
 
 from sortedcontainers import SortedDict
 
-from ctenex.domain.order.model import Order, OrderSide, OrderStatus, OrderType
+from ctenex.domain.entities import OrderSide, OrderType, ProcessedOrderStatus
+from ctenex.domain.order.model import Order
 
 
 class OrderBook:
@@ -73,5 +74,5 @@ class OrderBook:
         # Remove from ID lookup
         del self.orders_by_id[order_id]
 
-        order.status = OrderStatus.CANCELLED
+        order.status = ProcessedOrderStatus.CANCELLED
         return order

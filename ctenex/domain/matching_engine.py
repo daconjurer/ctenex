@@ -4,7 +4,13 @@ from uuid import UUID
 from loguru import logger
 
 from ctenex.domain.contracts import ContractCode
-from ctenex.domain.order.model import Order, OrderSide, OrderStatus, OrderType
+from ctenex.domain.entities import (
+    OpenOrderStatus,
+    OrderSide,
+    OrderType,
+    ProcessedOrderStatus,
+)
+from ctenex.domain.order.model import Order
 from ctenex.domain.order_book import OrderBook
 from ctenex.domain.trade.model import Trade
 
@@ -76,7 +82,8 @@ class MatchingEngine:
 
                 # Calculate trade quantity
                 trade_quantity = min(
-                    buy_order.remaining_quantity, sell_order.remaining_quantity
+                    buy_order.remaining_quantity,
+                    sell_order.remaining_quantity,
                 )
 
                 # Create and record the trade
@@ -95,16 +102,16 @@ class MatchingEngine:
 
                 # Update order statuses
                 if sell_order.remaining_quantity == 0:
-                    sell_order.status = OrderStatus.FILLED
+                    sell_order.status = ProcessedOrderStatus.FILLED
                     ask_queue.pop(0)
                     order_book.orders_by_id.pop(sell_order.id)
                 else:
-                    sell_order.status = OrderStatus.PARTIALLY_FILLED
+                    sell_order.status = OpenOrderStatus.PARTIALLY_FILLED
 
                 if buy_order.remaining_quantity == 0:
-                    buy_order.status = OrderStatus.FILLED
+                    buy_order.status = ProcessedOrderStatus.FILLED
                 else:
-                    buy_order.status = OrderStatus.PARTIALLY_FILLED
+                    buy_order.status = OpenOrderStatus.PARTIALLY_FILLED
 
             # If ask queue is empty, remove the price level
             if not ask_queue:
@@ -144,7 +151,8 @@ class MatchingEngine:
 
                 # Calculate trade quantity
                 trade_quantity = min(
-                    sell_order.remaining_quantity, buy_order.remaining_quantity
+                    sell_order.remaining_quantity,
+                    buy_order.remaining_quantity,
                 )
 
                 # Create and record the trade
@@ -163,16 +171,16 @@ class MatchingEngine:
 
                 # Update order statuses
                 if buy_order.remaining_quantity == 0:
-                    buy_order.status = OrderStatus.FILLED
+                    buy_order.status = ProcessedOrderStatus.FILLED
                     bid_queue.pop(0)
                     order_book.orders_by_id.pop(buy_order.id)
                 else:
-                    buy_order.status = OrderStatus.PARTIALLY_FILLED
+                    buy_order.status = OpenOrderStatus.PARTIALLY_FILLED
 
                 if sell_order.remaining_quantity == 0:
-                    sell_order.status = OrderStatus.FILLED
+                    sell_order.status = ProcessedOrderStatus.FILLED
                 else:
-                    sell_order.status = OrderStatus.PARTIALLY_FILLED
+                    sell_order.status = OpenOrderStatus.PARTIALLY_FILLED
 
             # If bid queue is empty, remove the price level
             if not bid_queue:
