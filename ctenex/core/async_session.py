@@ -34,6 +34,7 @@ def create_custom_engine(uri: str) -> AsyncEngine:
 
 
 class DatabaseManager:
+    @staticmethod
     @event.listens_for(Table, "before_create")
     def create_schema_if_not_exists(target: Table, connection: Connection, **_):
         connection.execute(DDL(f"CREATE SCHEMA IF NOT EXISTS {target.schema}"))
