@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
+from decimal import Decimal
 from enum import Enum
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.schema import ForeignKey
 from sqlalchemy.types import DECIMAL, TIMESTAMP, UUID, String
 
-from ctenex.core.db.base import Base
+from ctenex.core.db.base import ConcreteBase
 
 
 class Commodity(str, Enum):
@@ -48,28 +49,6 @@ class ProcessedOrderStatus(str, Enum):
 OrderStatus = OpenOrderStatus | ProcessedOrderStatus
 
 
-class ConcreteBase(Base):
-    __abstract__ = True
-
-    created_at: Mapped[datetime] = mapped_column(
-        type_=TIMESTAMP(timezone=True),
-        default=datetime.now(UTC),
-        nullable=False,
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        type_=TIMESTAMP(timezone=True),
-        default=datetime.now(UTC),
-        onupdate=datetime.now(UTC),
-        nullable=False,
-    )
-    deleted_at: Mapped[datetime] = mapped_column(
-        type_=TIMESTAMP(timezone=True),
-        nullable=True,
-    )
-
-    # __table_args__ = {"schema": "book"}
-
-
 class Order(ConcreteBase):
     """
     A generic model for orders. This is not a table in the database,
@@ -81,12 +60,6 @@ class Order(ConcreteBase):
 
     __abstract__ = True
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        type_=UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-        nullable=False,
-    )
     contract_id: Mapped[str] = mapped_column(
         type_=String,
         nullable=False,
@@ -103,12 +76,12 @@ class Order(ConcreteBase):
         type_=String,
         nullable=False,
     )
-    price: Mapped[DECIMAL] = mapped_column(
+    price: Mapped[Decimal] = mapped_column(
         type_=DECIMAL(precision=5, scale=2),
         nullable=False,
         index=True,
     )
-    quantity: Mapped[DECIMAL] = mapped_column(
+    quantity: Mapped[Decimal] = mapped_column(
         type_=DECIMAL(precision=5, scale=2),
         nullable=False,
     )
@@ -124,9 +97,9 @@ class Contract(ConcreteBase):
     __tablename__ = "contracts"
     __table_args__ = {"schema": "metadata"}
 
-    id: Mapped[str] = mapped_column(
+    contract_id: Mapped[str] = mapped_column(
         type_=String,
-        primary_key=True,
+        unique=True,
     )
     commodity: Mapped[str] = mapped_column(
         type_=String,
@@ -144,24 +117,24 @@ class Contract(ConcreteBase):
         type_=TIMESTAMP(timezone=True),
         nullable=False,
     )
-    tick_size: Mapped[float] = mapped_column(
+    tick_size: Mapped[Decimal] = mapped_column(
         type_=DECIMAL(precision=5, scale=2),
         nullable=False,
     )
-    contract_size: Mapped[float] = mapped_column(
+    contract_size: Mapped[Decimal] = mapped_column(
         type_=DECIMAL(precision=5, scale=2),
         nullable=False,
     )
-    location: Mapped[str] = mapped_column(ForeignKey("metadata.countries.id"))
+    location: Mapped[str] = mapped_column(ForeignKey("metadata.countries.country_id"))
 
 
 class Country(ConcreteBase):
     __tablename__ = "countries"
     __table_args__ = {"schema": "metadata"}
 
-    id: Mapped[str] = mapped_column(
+    country_id: Mapped[str] = mapped_column(
         type_=String,
-        primary_key=True,
+        unique=True,
     )
     name: Mapped[str] = mapped_column(
         type_=String,
@@ -175,7 +148,7 @@ class Country(ConcreteBase):
 class BookOrder(Order):
     __abstract__ = True
 
-    remaining_quantity: Mapped[DECIMAL] = mapped_column(
+    remaining_quantity: Mapped[Decimal] = mapped_column(
         type_=DECIMAL(precision=5, scale=2),
         nullable=False,
         default=0,
@@ -214,11 +187,11 @@ class Trade(ConcreteBase):
         type_=String,
         nullable=False,
     )
-    price: Mapped[DECIMAL] = mapped_column(
+    price: Mapped[Decimal] = mapped_column(
         type_=DECIMAL(precision=5, scale=2),
         nullable=False,
     )
-    quantity: Mapped[DECIMAL] = mapped_column(
+    quantity: Mapped[Decimal] = mapped_column(
         type_=DECIMAL(precision=5, scale=2),
         nullable=False,
     )
