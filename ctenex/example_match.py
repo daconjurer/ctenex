@@ -1,5 +1,5 @@
 from ctenex.domain.contracts import ContractCode
-from ctenex.domain.matching_engine import MatchingEngine
+from ctenex.domain.matching_engine.model import MatchingEngine
 from ctenex.domain.order.model import Order, OrderSide, OrderType
 
 
