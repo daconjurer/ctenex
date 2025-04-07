@@ -6,7 +6,7 @@ import pytest
 from ctenex.domain.contracts import ContractCode
 from ctenex.domain.entities import OrderSide, OrderType, ProcessedOrderStatus
 from ctenex.domain.order.model import Order
-from ctenex.domain.order_book import OrderBook
+from ctenex.domain.order_book.model import OrderBook
 
 
 @pytest.fixture

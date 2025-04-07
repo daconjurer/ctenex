@@ -8,7 +8,7 @@ from ctenex.domain.entities import (
     OrderType,
     ProcessedOrderStatus,
 )
-from ctenex.domain.matching_engine import MatchingEngine
+from ctenex.domain.matching_engine.model import MatchingEngine
 from ctenex.domain.order.model import Order
 from tests.fixtures import (  # noqa F401
     limit_buy_order,

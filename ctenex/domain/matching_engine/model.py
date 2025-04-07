@@ -11,7 +11,7 @@ from ctenex.domain.entities import (
     ProcessedOrderStatus,
 )
 from ctenex.domain.order.model import Order
-from ctenex.domain.order_book import OrderBook
+from ctenex.domain.order_book.model import OrderBook
 from ctenex.domain.trade.model import Trade
 
 
