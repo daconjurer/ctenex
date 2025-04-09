@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from tests.fixtures import client  # noqa F401
+from tests.fixtures.domain import client  # noqa F401
 
 
 class TestStatusController:

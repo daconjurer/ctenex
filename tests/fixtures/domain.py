@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from decimal import Decimal
 from typing import Iterator
 from uuid import UUID
 
@@ -15,12 +16,12 @@ def limit_buy_order():
     return Order(
         id=UUID("655889cb-b7c8-47f9-a302-cf9673f21445"),
         contract_id=ContractCode.UK_BL_MAR_25,
-        trader_id="TRADER1",
+        trader_id=UUID("a0130b4b-5f77-4703-9a18-1af5a87cc8eb"),
         side=OrderSide.BUY,
-        order_type=OrderType.LIMIT,
-        price=100.0,
-        quantity=10.0,
-        created_at=datetime.now(UTC),
+        type=OrderType.LIMIT,
+        price=Decimal("100.0"),
+        quantity=Decimal("10.0"),
+        placed_at=datetime.now(UTC),
     )
 
 
@@ -29,12 +30,12 @@ def limit_sell_order():
     return Order(
         id=UUID("7a89806f-4435-47b5-b475-ff535d1c4bc9"),
         contract_id=ContractCode.UK_BL_MAR_25,
-        trader_id="TRADER2",
+        trader_id=UUID("fe4f4479-6740-4103-9fb4-13f562b52b85"),
         side=OrderSide.SELL,
-        order_type=OrderType.LIMIT,
-        price=100.0,
-        quantity=5.0,
-        created_at=datetime.now(UTC),
+        type=OrderType.LIMIT,
+        price=Decimal("100.0"),
+        quantity=Decimal("5.0"),
+        placed_at=datetime.now(UTC),
     )
 
 
@@ -43,12 +44,12 @@ def second_limit_sell_order():
     return Order(
         id=UUID("7ec5a9b7-fc70-4056-802a-b466b5f6a162"),
         contract_id=ContractCode.UK_BL_MAR_25,
-        trader_id="TRADER2",
+        trader_id=UUID("fe4f4479-6740-4103-9fb4-13f562b52b85"),
         side=OrderSide.SELL,
-        order_type=OrderType.LIMIT,
-        price=100.0,
-        quantity=15.0,
-        created_at=datetime.now(UTC),
+        type=OrderType.LIMIT,
+        price=Decimal("100.0"),
+        quantity=Decimal("15.0"),
+        placed_at=datetime.now(UTC),
     )
 
 

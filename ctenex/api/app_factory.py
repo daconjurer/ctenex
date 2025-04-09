@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from ctenex import __version__
 from ctenex.api.v1.controllers.exchange import router as exchange_router
 from ctenex.api.v1.controllers.status import router as status_router
-from ctenex.domain.matching_engine import MatchingEngine
+from ctenex.domain.matching_engine.model import MatchingEngine
 from ctenex.settings.application import get_app_settings
 
 settings = get_app_settings()
