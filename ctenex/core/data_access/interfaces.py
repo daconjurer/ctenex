@@ -4,11 +4,11 @@ from typing import Protocol, TypeVar
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
 
-from ctenex.core.async_session import AsyncSessionStream
+from ctenex.core.db.async_session import AsyncSessionStream
 from ctenex.core.utils.filter_sort import BaseFilterParams, SortParams
-from ctenex.domain.entities import ConcreteBase
+from ctenex.domain.entities import AbstractBase
 
-Entity = TypeVar("Entity", bound=ConcreteBase)
+Entity = TypeVar("Entity", bound=AbstractBase)
 
 
 class IRead(Protocol[Entity]):

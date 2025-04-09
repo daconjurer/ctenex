@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -12,8 +13,8 @@ class Contract(BaseModel):
     start_date: datetime
     end_date: datetime
     location: str = Field(description="Delivery location code (e.g., 'GB', 'DE')")
-    tick_size: float = Field(description="Minimum price movement")
-    contract_size: float = Field(
+    tick_size: Decimal = Field(description="Minimum price movement")
+    contract_size: Decimal = Field(
         description="Size of one contract unit in MW or equivalent"
     )
 

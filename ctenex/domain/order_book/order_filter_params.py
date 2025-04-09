@@ -4,7 +4,7 @@ from ctenex.core.utils.filter_sort import BaseFilterParams
 from ctenex.domain.entities import OrderSide, OrderStatus, OrderType
 
 
-class BookOrderFilterParams(BaseFilterParams):
+class OrderFilterParams(BaseFilterParams):
     """Filter parameters for orders."""
 
     contract_id: str | None = None

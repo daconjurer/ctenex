@@ -9,7 +9,7 @@ class Base(DeclarativeBase):
     pass
 
 
-class ConcreteBase(Base):
+class AbstractBase(Base):
     __abstract__ = True
 
     id: Mapped[uuid.UUID] = mapped_column(

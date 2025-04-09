@@ -9,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.schema import ForeignKey
 from sqlalchemy.types import DECIMAL, TIMESTAMP, UUID, String
 
-from ctenex.core.db.base import ConcreteBase
+from ctenex.core.db.base import AbstractBase
 
 
 class Commodity(str, Enum):
@@ -49,7 +49,7 @@ class ProcessedOrderStatus(str, Enum):
 OrderStatus = OpenOrderStatus | ProcessedOrderStatus
 
 
-class Order(ConcreteBase):
+class BaseOrder(AbstractBase):
     """
     A generic model for orders. This is not a table in the database,
     but a base class for the 'Order', 'Bid', and 'Ask' classes.
@@ -93,7 +93,7 @@ class Order(ConcreteBase):
     )
 
 
-class Contract(ConcreteBase):
+class Contract(AbstractBase):
     __tablename__ = "contracts"
     __table_args__ = {"schema": "metadata"}
 
@@ -128,7 +128,7 @@ class Contract(ConcreteBase):
     location: Mapped[str] = mapped_column(ForeignKey("metadata.countries.country_id"))
 
 
-class Country(ConcreteBase):
+class Country(AbstractBase):
     __tablename__ = "countries"
     __table_args__ = {"schema": "metadata"}
 
@@ -145,36 +145,22 @@ class Country(ConcreteBase):
 # Book aggregate
 
 
-class BookOrder(Order):
-    __abstract__ = True
+class Order(BaseOrder):
+    __tablename__ = "orders"
+    __table_args__ = {"schema": "book"}
 
     remaining_quantity: Mapped[Decimal] = mapped_column(
         type_=DECIMAL(precision=5, scale=2),
-        nullable=False,
-        default=0,
+        nullable=True,
     )
-    status: Mapped[OpenOrderStatus] = mapped_column(
+    status: Mapped[OrderStatus] = mapped_column(
         type_=String,
         nullable=False,
         default=OpenOrderStatus.OPEN,
     )
 
 
-class Bid(BookOrder):
-    __tablename__ = "bids"
-    __table_args__ = {"schema": "book"}
-
-    trades: Mapped[list[BookTrade]] = relationship()
-
-
-class Ask(BookOrder):
-    __tablename__ = "asks"
-    __table_args__ = {"schema": "book"}
-
-    trades: Mapped[list[BookTrade]] = relationship()
-
-
-class Trade(ConcreteBase):
+class BaseTrade(AbstractBase):
     __abstract__ = True
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -202,18 +188,21 @@ class Trade(ConcreteBase):
     )
 
 
-class BookTrade(Trade):
+class Trade(BaseTrade):
     __tablename__ = "trades"
     __table_args__ = {"schema": "book"}
 
-    buy_order_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("book.bids.id"))
-    sell_order_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("book.asks.id"))
+    buy_order_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("book.orders.id"))
+    sell_order_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("book.orders.id"))
+
+    bid = relationship(Order, foreign_keys=[buy_order_id])
+    ask = relationship(Order, foreign_keys=[sell_order_id])
 
 
 # History aggregate
 
 
-class ProcessedOrder(Order):
+class ProcessedOrder(BaseOrder):
     __abstract__ = True
 
     filled_at: Mapped[datetime] = mapped_column(
@@ -224,27 +213,21 @@ class ProcessedOrder(Order):
     )
 
 
-class HistoricBid(ProcessedOrder):
-    __tablename__ = "historic_bids"
+class HistoricOrder(ProcessedOrder):
+    __tablename__ = "historic_orders"
     __table_args__ = {"schema": "history"}
 
-    trades: Mapped[list[HistoricTrade]] = relationship()
 
-
-class HistoricAsk(ProcessedOrder):
-    __tablename__ = "historic_asks"
-    __table_args__ = {"schema": "history"}
-
-    trades: Mapped[list[HistoricTrade]] = relationship()
-
-
-class HistoricTrade(Trade):
+class HistoricTrade(BaseTrade):
     __tablename__ = "trades_history"
     __table_args__ = {"schema": "history"}
 
     buy_order_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("history.historic_bids.id")
+        ForeignKey("history.historic_orders.id")
     )
     sell_order_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("history.historic_asks.id")
+        ForeignKey("history.historic_orders.id")
     )
+
+    bid = relationship(HistoricOrder, foreign_keys=[buy_order_id])
+    ask = relationship(HistoricOrder, foreign_keys=[sell_order_id])

@@ -4,8 +4,8 @@ from typing import Type
 from loguru import logger
 from sqlalchemy import column, select
 
-from ctenex.core.async_session import AsyncSessionStream
 from ctenex.core.data_access.interfaces import Entity, IRead
+from ctenex.core.db.async_session import AsyncSessionStream
 from ctenex.core.utils.filter_sort import BaseFilterParams, SortParams
 from ctenex.domain.exceptions import CoreException
 
@@ -18,7 +18,7 @@ class GenericReader(IRead[Entity]):
         db: AsyncSessionStream,
         id: uuid.UUID,
     ) -> Entity | None:
-        logger.info(f"Getting {self.model.__name__} by ID: {id}")
+        logger.info(f"Getting one {self.model.__name__} record by ID: {id}")
 
         statement = select(self.model).where(column("id") == id)
 
@@ -38,7 +38,7 @@ class GenericReader(IRead[Entity]):
         Fetches a record by a filter key-value pair.
         """
 
-        logger.info(f"Getting one {self.model.__name__} by filter {filter}")
+        logger.info(f"Getting one {self.model.__name__} record by filter {filter}")
 
         filters = filter.get_filters()
 
@@ -70,7 +70,7 @@ class GenericReader(IRead[Entity]):
          sorting and pagination.
         """
 
-        logger.info(f"Getting several {self.model.__name__}")
+        logger.info(f"Getting several {self.model.__name__} records")
 
         statement = select(self.model)
 

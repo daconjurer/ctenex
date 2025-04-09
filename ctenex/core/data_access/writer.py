@@ -16,7 +16,7 @@ class GenericWriter(IWrite[Entity]):
         session: async_scoped_session[AsyncSession],
         entity: Entity,
     ) -> Entity:
-        logger.info(f"Creating {self.model.__name__}")
+        logger.info(f"Creating a {self.model.__name__} record")
 
         session.add(entity)
         return entity
@@ -26,7 +26,7 @@ class GenericWriter(IWrite[Entity]):
         session: async_scoped_session[AsyncSession],
         entity: Entity,
     ) -> Entity:
-        logger.info(f"Updating {self.model.__name__}")
+        logger.info(f"Updating a {self.model.__name__} record")
         await session.execute(
             update(self.model)
             .where(column("id") == entity.id)
@@ -44,7 +44,7 @@ class GenericWriter(IWrite[Entity]):
         session: async_scoped_session[AsyncSession],
         entity: Entity,
     ) -> Entity:
-        logger.info(f"Deleting {self.model.__name__}")
+        logger.info(f"Deleting a {self.model.__name__} record")
 
         # Soft delete
         entity.is_deleted = True

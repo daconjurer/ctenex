@@ -6,7 +6,6 @@ from loguru import logger
 from ctenex.domain.contracts import ContractCode
 from ctenex.domain.entities import (
     OpenOrderStatus,
-    OrderSide,
     OrderType,
     ProcessedOrderStatus,
 )
@@ -29,7 +28,7 @@ class MatchingEngine:
         """Stop the matching engine and clear all order books."""
         self.order_books.clear()
 
-    def add_order(self, order: Order) -> UUID:
+    async def add_order(self, order: Order) -> UUID:
         """Add an order to the book and return any trades that result."""
         logger.debug(f"Adding order: {order}")
 
@@ -37,27 +36,27 @@ class MatchingEngine:
             order.remaining_quantity = order.quantity
 
         # Try to match the order first
-        if order.side == OrderSide.BUY:
-            trades = self._match_buy_order(order)
-        else:
-            trades = self._match_sell_order(order)
+        # if order.side == OrderSide.BUY:
+        #     trades = self._match_buy_order(order)
+        # else:
+        #     trades = self._match_sell_order(order)
 
         # If order still has quantity remaining, add to book
         # (only for limit orders) <- TODO: review this
-        if order.remaining_quantity > 0 and order.order_type == OrderType.LIMIT:
-            self.order_books[order.contract_id].add_order(order)
+        if order.remaining_quantity > 0 and order.type == OrderType.LIMIT:
+            await self.order_books[order.contract_id].add_order(order)
 
-        self.trades.extend(trades)
+        # self.trades.extend(trades)
 
         return order.id
 
-    def get_orders(self, contract_id: ContractCode) -> list[Order]:
-        return self.order_books[contract_id].get_orders()
+    async def get_orders(self, contract_id: ContractCode) -> list[Order]:
+        return await self.order_books[contract_id].get_orders()
 
-    def get_trades(self, contract_id: ContractCode) -> list[Trade]:
+    async def get_trades(self, contract_id: ContractCode) -> list[Trade]:
         return [trade for trade in self.trades if trade.contract_id == contract_id]
 
-    def _match_buy_order(self, buy_order: Order) -> list[Trade]:
+    async def _match_buy_order(self, buy_order: Order) -> list[Trade]:
         trades = []
         order_book = self.order_books[buy_order.contract_id]
 
@@ -69,10 +68,7 @@ class MatchingEngine:
             best_ask_price = order_book.asks.keys()[0]
 
             # For limit orders, check if the price is acceptable
-            if (
-                buy_order.order_type == OrderType.LIMIT
-                and best_ask_price > buy_order.price
-            ):
+            if buy_order.type == OrderType.LIMIT and best_ask_price > buy_order.price:
                 break
 
             # Match against the best ask price
@@ -126,7 +122,7 @@ class MatchingEngine:
 
         return trades
 
-    def _match_sell_order(self, sell_order: Order) -> list[Trade]:
+    async def _match_sell_order(self, sell_order: Order) -> list[Trade]:
         trades = []
         order_book = self.order_books[sell_order.contract_id]
 
@@ -138,10 +134,7 @@ class MatchingEngine:
             best_bid_price = -order_book.bids.keys()[0]  # Convert back from negative
 
             # For limit orders, check if the price is acceptable
-            if (
-                sell_order.order_type == OrderType.LIMIT
-                and best_bid_price < sell_order.price
-            ):
+            if sell_order.type == OrderType.LIMIT and best_bid_price < sell_order.price:
                 break
 
             # Match against the best bid price
