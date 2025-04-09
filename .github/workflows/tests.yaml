@@ -35,5 +35,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run tests
-        uses: ./.github/actions/test/
+      - name: Run the tests
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry install
+          poetry run coverage run -m pytest tests --full-trace
+          poetry run coverage report -m
