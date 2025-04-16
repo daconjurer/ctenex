@@ -1,6 +1,6 @@
 from ctenex.domain.contracts import ContractCode
-from ctenex.domain.in_memory.matching_engine.model import MatchingEngine
 from ctenex.domain.entities.order.model import Order, OrderSide, OrderType
+from ctenex.domain.in_memory.matching_engine.model import MatchingEngine
 
 
 def example_match():
