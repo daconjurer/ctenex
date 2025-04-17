@@ -20,4 +20,4 @@ class TestTrade:
         assert trade.sell_order_id == UUID("b23f8d7e-5c1a-4b89-9d2e-7a5fb1234567")
         assert trade.price == Decimal("152.25")
         assert trade.quantity == Decimal("3.0")
-        assert isinstance(trade.timestamp, datetime)
+        assert isinstance(trade.generated_at, datetime)

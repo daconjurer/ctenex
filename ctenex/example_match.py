@@ -9,6 +9,7 @@ from ctenex.domain.order.model import Order, OrderSide, OrderType
 
 async def example_match():
     matching_engine = MatchingEngine()
+    matching_engine.start()
 
     # Add a limit buy order for contract MAR_100_MW
     await matching_engine.add_order(

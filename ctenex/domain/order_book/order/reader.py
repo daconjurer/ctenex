@@ -1,6 +1,6 @@
 from ctenex.core.data_access.reader import GenericReader
 from ctenex.domain.entities import Order
-from ctenex.domain.order_book.order_filter_params import OrderFilterParams
+from ctenex.domain.order_book.order.filter_params import OrderFilterParams
 
 
 class OrderFilter(OrderFilterParams):

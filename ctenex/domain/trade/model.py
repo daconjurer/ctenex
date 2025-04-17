@@ -12,7 +12,7 @@ class Trade(BaseModel):
     sell_order_id: UUID
     price: Decimal
     quantity: Decimal
-    timestamp: datetime = Field(default=datetime.now(UTC))
+    generated_at: datetime = Field(default=datetime.now(UTC))
 
     model_config = ConfigDict(
         json_schema_extra={

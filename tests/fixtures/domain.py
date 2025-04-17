@@ -34,7 +34,7 @@ def limit_sell_order():
         side=OrderSide.SELL,
         type=OrderType.LIMIT,
         price=Decimal("100.0"),
-        quantity=Decimal("5.0"),
+        quantity=Decimal("10.0"),
         placed_at=datetime.now(UTC),
     )
 
