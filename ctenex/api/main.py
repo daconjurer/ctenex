@@ -1,11 +1,22 @@
+from fastapi import FastAPI
 from loguru import logger
 
-from ctenex.api.app_factory import create_app, lifespan
+from ctenex.api.app_factory import create_app
+from ctenex.api.controllers.status import router as status_router
+from ctenex.api.v1.in_memory.controllers.exchange import router as exchange_router
+from ctenex.api.v1.in_memory.lifespan import lifespan
 from ctenex.settings.application import get_app_settings
 
 settings = get_app_settings()
 
-stateful_app = create_app(lifespan=lifespan)
+app = FastAPI()
+
+stateful_app = create_app(
+    lifespan=lifespan,
+    routers=[status_router, exchange_router],
+)
+
+app.mount("/v1/stateful", stateful_app)
 
 
 def main():

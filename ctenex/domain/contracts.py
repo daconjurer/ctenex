@@ -1,7 +1,9 @@
 from datetime import datetime
+from decimal import Decimal
 from enum import Enum
 
-from ctenex.domain.entities.contract.model import Commodity, Contract, DeliveryPeriod
+from ctenex.domain.entities import Commodity, DeliveryPeriod
+from ctenex.domain.order_book.contract.model import Contract
 
 
 class ContractCode(str, Enum):
@@ -15,5 +17,5 @@ class ContractBaselineMarch2025(Contract):
     start_date: datetime = datetime(2025, 3, 1)
     end_date: datetime = datetime(2025, 3, 31)
     location: str = "GB"
-    tick_size: float = 0.01
-    contract_size: float = 1.0
+    tick_size: Decimal = Decimal("0.01")
+    contract_size: Decimal = Decimal("1.0")

@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from decimal import Decimal
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -9,9 +10,9 @@ class Trade(BaseModel):
     contract_id: str
     buy_order_id: UUID
     sell_order_id: UUID
-    price: float
-    quantity: float
-    timestamp: datetime = Field(default=datetime.now(UTC))
+    price: Decimal
+    quantity: Decimal
+    generated_at: datetime = Field(default=datetime.now(UTC))
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -34,6 +35,6 @@ class Trade(BaseModel):
             f"sell_order_id={self.sell_order_id}, "
             f"price={self.price}, "
             f"quantity={self.quantity}, "
-            f"timestamp={self.timestamp}"
+            f"generated_at={self.generated_at}"
             ")"
         )

@@ -1,6 +1,8 @@
 from datetime import datetime
+from decimal import Decimal
 
-from ctenex.domain.entities.contract.model import Commodity, Contract, DeliveryPeriod
+from ctenex.domain.entities import Commodity, DeliveryPeriod
+from ctenex.domain.order_book.contract.model import Contract
 
 
 class TestContract:
@@ -12,8 +14,8 @@ class TestContract:
             start_date=datetime(2025, 3, 1),
             end_date=datetime(2025, 3, 31),
             location="GB",
-            tick_size=0.01,
-            contract_size=1.0,
+            tick_size=Decimal("0.01"),
+            contract_size=Decimal("1.0"),
         )
 
         assert contract.id == "UK-POWER-MAR-2025"
@@ -22,5 +24,5 @@ class TestContract:
         assert contract.start_date == datetime(2025, 3, 1)
         assert contract.end_date == datetime(2025, 3, 31)
         assert contract.location == "GB"
-        assert contract.tick_size == 0.01
-        assert contract.contract_size == 1.0
+        assert contract.tick_size == Decimal("0.01")
+        assert contract.contract_size == Decimal("1.0")
