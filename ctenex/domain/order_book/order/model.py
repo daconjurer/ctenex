@@ -1,9 +1,10 @@
 from datetime import UTC, datetime
 from decimal import Decimal
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
+from ctenex.domain.base_model import BaseDomainModel
 from ctenex.domain.contracts import ContractCode
 from ctenex.domain.entities import (
     OpenOrderStatus,
@@ -13,8 +14,7 @@ from ctenex.domain.entities import (
 )
 
 
-class Order(BaseModel):
-    id: UUID = Field(default_factory=uuid4)
+class Order(BaseDomainModel):
     contract_id: ContractCode
     trader_id: UUID
     side: OrderSide

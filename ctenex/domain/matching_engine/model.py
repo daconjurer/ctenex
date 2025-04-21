@@ -116,7 +116,11 @@ class MatchingEngine:
                 break
 
             # For limit orders, check if the price is acceptable
-            if buy_order.type == OrderType.LIMIT and best_ask_price > buy_order.price:
+            if (
+                buy_order.price is not None  # Market orders have no price
+                and buy_order.type == OrderType.LIMIT
+                and best_ask_price > buy_order.price
+            ):
                 break
 
             async with self.db() as session:
@@ -166,7 +170,8 @@ class MatchingEngine:
             # TODO: Update order book and trade in a transaction
 
             # Update order book
-            await order_book.update_order(next_sell_order)
+            updated_sell_order = OrderSchema(**get_entity_values(next_sell_order))
+            await order_book.update_order(updated_sell_order)
 
             # Create and record the trade
             trade = TradeSchema(
@@ -256,7 +261,8 @@ class MatchingEngine:
                 sell_order.status = OpenOrderStatus.PARTIALLY_FILLED
 
             # Update order book
-            await order_book.update_order(next_buy_order)
+            updated_buy_order = OrderSchema(**get_entity_values(next_buy_order))
+            await order_book.update_order(updated_buy_order)
 
             # Create and record the trade
             trade = TradeSchema(

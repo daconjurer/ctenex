@@ -1,13 +1,14 @@
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
 
+from ctenex.domain.base_model import BaseDomainModel
 from ctenex.domain.entities import Commodity, DeliveryPeriod
 
 
-class Contract(BaseModel):
-    id: str = Field(description="Unique identifier for the contract")
+class Contract(BaseDomainModel):
+    external_id: str = Field(description="Unique identifier for the contract")
     commodity: Commodity
     delivery_period: DeliveryPeriod
     start_date: datetime

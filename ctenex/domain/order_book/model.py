@@ -58,16 +58,15 @@ class OrderBook:
     async def cancel_order(self, order_id: UUID) -> OrderSchema | None:
         """Cancel an order and remove it from the book."""
 
-        order = await self.orders_reader.get(self.db, order_id)
-        if order is None:
+        entity = await self.orders_reader.get(self.db, order_id)
+        if entity is None:
             return None
 
-        if order.price is None:
+        if entity.price is None:
             raise ValueError("Order cannot be cancelled as it has no price")
 
-        order.status = ProcessedOrderStatus.CANCELLED
+        entity.status = ProcessedOrderStatus.CANCELLED
         async with self.db() as session:
-            entity = Order(**order.model_dump())
             await self.orders_writer.update(session, entity)
             await session.commit()
 

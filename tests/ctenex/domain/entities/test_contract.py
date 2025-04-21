@@ -8,7 +8,7 @@ from ctenex.domain.order_book.contract.model import Contract
 class TestContract:
     def test_contract_creation(self):
         contract = Contract(
-            id="UK-POWER-MAR-2025",
+            external_id="UK-POWER-MAR-2025",
             commodity=Commodity.POWER,
             delivery_period=DeliveryPeriod.MONTHLY,
             start_date=datetime(2025, 3, 1),
@@ -18,7 +18,7 @@ class TestContract:
             contract_size=Decimal("1.0"),
         )
 
-        assert contract.id == "UK-POWER-MAR-2025"
+        assert contract.external_id == "UK-POWER-MAR-2025"
         assert contract.commodity == "power"
         assert contract.delivery_period == "monthly"
         assert contract.start_date == datetime(2025, 3, 1)

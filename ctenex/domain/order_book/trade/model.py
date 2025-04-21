@@ -1,12 +1,13 @@
 from datetime import UTC, datetime
 from decimal import Decimal
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
+
+from ctenex.domain.base_model import BaseDomainModel
 
 
-class Trade(BaseModel):
-    id: UUID = Field(default_factory=uuid4)
+class Trade(BaseDomainModel):
     contract_id: str
     buy_order_id: UUID
     sell_order_id: UUID
