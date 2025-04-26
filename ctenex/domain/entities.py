@@ -151,7 +151,7 @@ class Order(BaseOrder):
 
     remaining_quantity: Mapped[Decimal] = mapped_column(
         type_=DECIMAL(precision=5, scale=2),
-        nullable=True,
+        nullable=False,
     )
     status: Mapped[OrderStatus] = mapped_column(
         type_=String,

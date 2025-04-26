@@ -100,7 +100,7 @@ class TestMatchingEngine:
         """Test matching limit orders where one buy order is partially filled."""
 
         # Setup
-        ...
+        limit_sell_order.quantity = Decimal("5.0")
 
         # Test
         self.matching_engine.add_order(limit_buy_order)  # Quantity: 10.0
@@ -161,7 +161,7 @@ class TestMatchingEngine:
             trader_id=uuid4(),
             side=OrderSide.BUY,
             type=OrderType.MARKET,
-            quantity=Decimal("5.0"),
+            quantity=Decimal("10.0"),
             placed_at=datetime.now(UTC),
         )
 

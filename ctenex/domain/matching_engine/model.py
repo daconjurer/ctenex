@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Type
 from uuid import UUID
 
@@ -108,7 +109,10 @@ class MatchingEngine:
         trades = []
 
         # Match against the best ask price
-        while OpenOrderStatus.OPEN == buy_order.status:
+        while (
+            OpenOrderStatus.OPEN == buy_order.status
+            or OpenOrderStatus.PARTIALLY_FILLED == buy_order.status
+        ):
             # Check if there are any asks to match against
             best_ask_price = await order_book.get_best_ask_price()
 
@@ -134,7 +138,7 @@ class MatchingEngine:
                         ),
                         Order.price
                         <= (
-                            float("inf")
+                            Decimal("999.99")
                             if buy_order.type == OrderType.MARKET
                             else buy_order.price
                         ),
@@ -144,12 +148,15 @@ class MatchingEngine:
                         Order.created_at.asc(),  # First in time at each price level
                     )
                 )
-                next_sell_order = next_sell_order_cursor.scalars().one()
+                next_sell_order = next_sell_order_cursor.scalars().first()
+
+            if next_sell_order is None:
+                break
 
             # Calculate trade quantity
+            assert buy_order.remaining_quantity is not None
             trade_quantity = min(
-                buy_order.remaining_quantity,
-                next_sell_order.remaining_quantity,
+                buy_order.remaining_quantity, next_sell_order.remaining_quantity
             )
 
             # Update order quantities
@@ -181,20 +188,7 @@ class MatchingEngine:
                 price=best_ask_price,
                 quantity=trade_quantity,
             )
-            # trade_entity = Trade(**trade.model_dump())
-
-            # async with self.db() as session:
-            #     generated_trade = await self.trades_writer.create(session, trade_entity)
-            #     await session.commit()
-
             trades.append(trade)
-            # trades.append(TradeSchema(**get_entity_values(trade)))
-
-        # if len(trades) > 0:
-        #     logger.debug(f"Matched order with ID {buy_order.id}")
-        #     logger.debug(f"Generated {len(trades)} trades:")
-        #     for trade in trades:
-        #         logger.debug(trade)
 
         return trades
 
@@ -203,7 +197,10 @@ class MatchingEngine:
         trades = []
 
         # Match against the best bid price
-        while OpenOrderStatus.OPEN == sell_order.status:
+        while (
+            OpenOrderStatus.OPEN == sell_order.status
+            or OpenOrderStatus.PARTIALLY_FILLED == sell_order.status
+        ):
             # Check if there are any bids to match against
             best_bid_price = await order_book.get_best_bid_price()
 
@@ -211,7 +208,11 @@ class MatchingEngine:
                 break
 
             # For limit orders, check if the price is acceptable
-            if sell_order.type == OrderType.LIMIT and best_bid_price < sell_order.price:
+            if (
+                sell_order.price is not None  # Market orders have no price
+                and sell_order.type == OrderType.LIMIT
+                and best_bid_price < sell_order.price
+            ):
                 break
 
             async with self.db() as session:
@@ -225,7 +226,7 @@ class MatchingEngine:
                         ),
                         Order.price
                         <= (
-                            float("inf")
+                            Decimal("999.99")
                             if sell_order.type == OrderType.MARKET
                             else sell_order.price
                         ),
@@ -235,9 +236,13 @@ class MatchingEngine:
                         Order.created_at.asc(),  # First in time at each price level
                     )
                 )
-                next_buy_order = next_buy_order_cursor.scalars().one()
+                next_buy_order = next_buy_order_cursor.scalars().first()
+
+            if next_buy_order is None:
+                break
 
             # Calculate trade quantity
+            assert sell_order.remaining_quantity is not None
             trade_quantity = min(
                 sell_order.remaining_quantity,
                 next_buy_order.remaining_quantity,
@@ -272,19 +277,6 @@ class MatchingEngine:
                 price=best_bid_price,
                 quantity=trade_quantity,
             )
-            # trade_entity = Trade(**trade.model_dump())
-
             trades.append(trade)
-            # trades.append(TradeSchema(**get_entity_values(trade)))
-
-        # async with self.db() as session:
-        #     await self.trades_writer.create(session, trade_entity)
-        #     await session.commit()
-
-        # if len(trades) > 0:
-        #     logger.debug(f"Matched order with ID {sell_order.id}")
-        #     logger.debug(f"Generated {len(trades)} trades:")
-        #     for trade in trades:
-        #         logger.debug(trade)
 
         return trades

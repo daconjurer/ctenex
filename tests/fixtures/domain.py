@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Iterator
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
@@ -38,7 +38,7 @@ def limit_sell_order():
         side=OrderSide.SELL,
         type=OrderType.LIMIT,
         price=Decimal("100.0"),
-        quantity=Decimal("5.0"),
+        quantity=Decimal("10.0"),
         placed_at=datetime.now(UTC),
     )
 
@@ -53,6 +53,45 @@ def second_limit_sell_order():
         type=OrderType.LIMIT,
         price=Decimal("100.0"),
         quantity=Decimal("15.0"),
+        placed_at=datetime.now(UTC),
+    )
+
+
+@pytest.fixture
+def market_buy_order():
+    return Order(
+        id=uuid4(),
+        contract_id=ContractCode.UK_BL_MAR_25,
+        trader_id=uuid4(),
+        side=OrderSide.BUY,
+        type=OrderType.MARKET,
+        quantity=Decimal("10.0"),
+        placed_at=datetime.now(UTC),
+    )
+
+
+@pytest.fixture
+def second_market_buy_order():
+    return Order(
+        id=uuid4(),
+        contract_id=ContractCode.UK_BL_MAR_25,
+        trader_id=uuid4(),
+        side=OrderSide.BUY,
+        type=OrderType.MARKET,
+        quantity=Decimal("15.0"),
+        placed_at=datetime.now(UTC),
+    )
+
+
+@pytest.fixture
+def market_sell_order():
+    return Order(
+        id=uuid4(),
+        contract_id=ContractCode.UK_BL_MAR_25,
+        trader_id=uuid4(),
+        side=OrderSide.SELL,
+        type=OrderType.MARKET,
+        quantity=Decimal("5.0"),
         placed_at=datetime.now(UTC),
     )
 
