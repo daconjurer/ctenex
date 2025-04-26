@@ -8,8 +8,10 @@ from fastapi.testclient import TestClient
 
 from ctenex.api.app_factory import create_app
 from ctenex.api.controllers.status import router as status_router
-from ctenex.api.v1.in_memory.controllers.exchange import router as stateful_exchange_router
 from ctenex.api.v1.controllers.exchange import router as stateless_exchange_router
+from ctenex.api.v1.in_memory.controllers.exchange import (
+    router as stateful_exchange_router,
+)
 from ctenex.api.v1.in_memory.lifespan import lifespan
 from ctenex.domain.contracts import ContractCode
 from ctenex.domain.entities import OrderSide, OrderType
