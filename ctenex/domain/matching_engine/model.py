@@ -1,5 +1,4 @@
 from decimal import Decimal
-from typing import Type
 from uuid import UUID
 
 from loguru import logger
@@ -16,7 +15,7 @@ from ctenex.domain.entities import (
     ProcessedOrderStatus,
     Trade,
 )
-from ctenex.domain.order_book.model import OrderBook
+from ctenex.domain.order_book.model import order_book
 from ctenex.domain.order_book.order.model import Order as OrderSchema
 from ctenex.domain.order_book.trade.filter_params import TradeFilterParams
 from ctenex.domain.order_book.trade.model import Trade as TradeSchema
@@ -27,22 +26,13 @@ from ctenex.domain.order_book.trade.writer import trades_writer
 class MatchingEngine:
     trades_writer = trades_writer
     trades_reader = trades_reader
+    order_book = order_book
 
     def __init__(
         self,
         db: AsyncSessionStream = get_async_session,
     ):
-        self.order_books: dict[ContractCode, OrderBook] = {}
         self.db: AsyncSessionStream = db
-
-    def start(self, contract_codes: Type[ContractCode] = ContractCode):
-        """Start the matching engine and create order books for all contract codes."""
-        for contract_code in contract_codes:
-            self.order_books[contract_code] = OrderBook(contract_code)
-
-    def stop(self):
-        """Stop the matching engine and clear all order books."""
-        self.order_books.clear()
 
     async def add_order(self, order: OrderSchema) -> UUID:
         """Add an order to the book and return any trades that result."""
@@ -58,7 +48,7 @@ class MatchingEngine:
             trades = await self._match_sell_order(order)
 
         # Persist order in book (whatever the status)
-        await self.order_books[order.contract_id].add_order(order)
+        await self.order_book.add_order(order)
 
         # Persist trades
         async with self.db() as session:
@@ -73,14 +63,14 @@ class MatchingEngine:
         self,
         contract_id: ContractCode,
     ) -> list[OrderSchema]:
-        return await self.order_books[contract_id].get_orders()
+        return await self.order_book.get_orders(contract_id)
 
     async def get_order(
         self,
         contract_id: ContractCode,
         order_id: UUID,
     ) -> OrderSchema | None:
-        return await self.order_books[contract_id].get_order(order_id)
+        return await self.order_book.get_order(order_id)
 
     async def get_trades_by_order(
         self,
@@ -88,7 +78,7 @@ class MatchingEngine:
         order_id: UUID,
     ) -> list[TradeSchema]:
         # check if order is in book
-        order = await self.order_books[contract_id].get_order(order_id)
+        order = await self.order_book.get_order(order_id)
         if order is None:
             raise ValueError(f"Order with ID {order_id} not found in book")
 
@@ -105,7 +95,6 @@ class MatchingEngine:
         return [TradeSchema(**get_entity_values(trade)) for trade in trades]
 
     async def _match_buy_order(self, buy_order: OrderSchema) -> list[TradeSchema]:
-        order_book = self.order_books[buy_order.contract_id]
         trades = []
 
         # Match against the best ask price
@@ -114,7 +103,9 @@ class MatchingEngine:
             or OpenOrderStatus.PARTIALLY_FILLED == buy_order.status
         ):
             # Check if there are any asks to match against
-            best_ask_price = await order_book.get_best_ask_price()
+            best_ask_price = await self.order_book.get_best_ask_price(
+                contract_id=buy_order.contract_id,
+            )
 
             if best_ask_price is None:
                 break
@@ -178,11 +169,11 @@ class MatchingEngine:
 
             # Update order book
             updated_sell_order = OrderSchema(**get_entity_values(next_sell_order))
-            await order_book.update_order(updated_sell_order)
+            await self.order_book.update_order(updated_sell_order)
 
             # Create and record the trade
             trade = TradeSchema(
-                contract_id=order_book.contract_id,
+                contract_id=buy_order.contract_id,
                 buy_order_id=buy_order.id,
                 sell_order_id=next_sell_order.id,
                 price=best_ask_price,
@@ -193,7 +184,6 @@ class MatchingEngine:
         return trades
 
     async def _match_sell_order(self, sell_order: OrderSchema) -> list[TradeSchema]:
-        order_book = self.order_books[sell_order.contract_id]
         trades = []
 
         # Match against the best bid price
@@ -202,7 +192,9 @@ class MatchingEngine:
             or OpenOrderStatus.PARTIALLY_FILLED == sell_order.status
         ):
             # Check if there are any bids to match against
-            best_bid_price = await order_book.get_best_bid_price()
+            best_bid_price = await self.order_book.get_best_bid_price(
+                contract_id=sell_order.contract_id,
+            )
 
             if best_bid_price is None:
                 break
@@ -267,7 +259,7 @@ class MatchingEngine:
 
             # Update order book
             updated_buy_order = OrderSchema(**get_entity_values(next_buy_order))
-            await order_book.update_order(updated_buy_order)
+            await self.order_book.update_order(updated_buy_order)
 
             # Create and record the trade
             trade = TradeSchema(
@@ -280,3 +272,6 @@ class MatchingEngine:
             trades.append(trade)
 
         return trades
+
+
+matching_engine = MatchingEngine()

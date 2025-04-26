@@ -8,7 +8,8 @@ from fastapi.testclient import TestClient
 
 from ctenex.api.app_factory import create_app
 from ctenex.api.controllers.status import router as status_router
-from ctenex.api.v1.in_memory.controllers.exchange import router as exchange_router
+from ctenex.api.v1.in_memory.controllers.exchange import router as stateful_exchange_router
+from ctenex.api.v1.controllers.exchange import router as stateless_exchange_router
 from ctenex.api.v1.in_memory.lifespan import lifespan
 from ctenex.domain.contracts import ContractCode
 from ctenex.domain.entities import OrderSide, OrderType
@@ -104,7 +105,17 @@ def client_for_stateful_app() -> Iterator[TestClient]:
     with TestClient(
         app=create_app(
             lifespan=lifespan,
-            routers=[status_router, exchange_router],
+            routers=[status_router, stateful_exchange_router],
+        )
+    ) as client:
+        yield client
+
+
+@pytest.fixture
+def client_for_stateless_app() -> Iterator[TestClient]:
+    with TestClient(
+        app=create_app(
+            routers=[status_router, stateless_exchange_router],
         )
     ) as client:
         yield client

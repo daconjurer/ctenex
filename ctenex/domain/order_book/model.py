@@ -5,9 +5,10 @@ from sqlalchemy import func, select
 
 from ctenex.core.db.async_session import AsyncSessionStream, get_async_session
 from ctenex.core.db.utils import get_entity_values
+from ctenex.domain.contracts import ContractCode
 from ctenex.domain.entities import Order, OrderSide, OrderType, ProcessedOrderStatus
 from ctenex.domain.order_book.order.model import Order as OrderSchema
-from ctenex.domain.order_book.order.reader import orders_reader
+from ctenex.domain.order_book.order.reader import OrderFilter, orders_reader
 from ctenex.domain.order_book.order.writer import orders_writer
 
 
@@ -17,14 +18,18 @@ class OrderBook:
 
     def __init__(
         self,
-        contract_id: str,
         db: AsyncSessionStream = get_async_session,
     ):
-        self.contract_id = contract_id
         self.db: AsyncSessionStream = db
 
-    async def get_orders(self) -> list[OrderSchema]:
-        orders = await self.orders_reader.get_many(self.db)
+    async def get_orders(
+        self,
+        contract_id: ContractCode,
+    ) -> list[OrderSchema]:
+        orders = await self.orders_reader.get_many(
+            self.db,
+            filter=OrderFilter(contract_id=contract_id),
+        )
         return [OrderSchema(**get_entity_values(order)) for order in orders]
 
     async def get_order(
@@ -81,24 +86,33 @@ class OrderBook:
 
         return OrderSchema(**get_entity_values(entity))
 
-    async def get_best_ask_price(self) -> Decimal | None:
+    async def get_best_ask_price(
+        self,
+        contract_id: ContractCode,
+    ) -> Decimal | None:
         """Get the best ask price from the order book."""
         async with self.db() as session:
             best_ask = await session.execute(
                 select(func.max(Order.price)).where(
-                    Order.contract_id == self.contract_id,
+                    Order.contract_id == contract_id,
                     Order.side == OrderSide.SELL,
                 )
             )
             return best_ask.scalar_one_or_none()
 
-    async def get_best_bid_price(self) -> Decimal | None:
+    async def get_best_bid_price(
+        self,
+        contract_id: ContractCode,
+    ) -> Decimal | None:
         """Get the best bid price from the order book."""
         async with self.db() as session:
             best_bid = await session.execute(
                 select(func.min(Order.price)).where(
-                    Order.contract_id == self.contract_id,
+                    Order.contract_id == contract_id,
                     Order.side == OrderSide.BUY,
                 )
             )
             return best_bid.scalar_one_or_none()
+
+
+order_book = OrderBook()

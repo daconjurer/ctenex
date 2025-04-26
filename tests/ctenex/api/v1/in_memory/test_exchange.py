@@ -158,7 +158,7 @@ class TestOrdersController:
 
     # GET /orders
 
-    def _test_get_orders(
+    def test_get_orders(
         self,
         client: TestClient,  # noqa F811
     ):
@@ -223,5 +223,4 @@ class TestOrdersController:
         assert payload[0]["type"] == order_request_1.type
         assert payload[0]["price"] == str(order_request_1.price)
         assert payload[0]["quantity"] == str(order_request_1.quantity)
-        # assert payload[0]["remaining_quantity"] == str(order_request_1.remaining_quantity)
         assert payload[0]["status"] == OpenOrderStatus.PARTIALLY_FILLED

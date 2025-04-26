@@ -3,7 +3,7 @@ from typing import AsyncIterator
 
 from fastapi import FastAPI
 
-from ctenex.domain.matching_engine.model import MatchingEngine
+from ctenex.domain.in_memory.matching_engine.model import MatchingEngine
 
 
 @asynccontextmanager

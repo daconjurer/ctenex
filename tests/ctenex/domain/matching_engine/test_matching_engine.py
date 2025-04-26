@@ -9,7 +9,7 @@ from ctenex.domain.entities import (
     OrderType,
     ProcessedOrderStatus,
 )
-from ctenex.domain.matching_engine.model import MatchingEngine
+from ctenex.domain.matching_engine.model import matching_engine
 from ctenex.domain.order_book.order.model import Order
 from tests.fixtures.db import (
     async_session,  # noqa F811
@@ -29,12 +29,9 @@ from tests.fixtures.domain import (
 class TestMatchingEngine:
     def setup_method(self):
         """Create a fresh matching engine before each test."""
-        self.matching_engine = MatchingEngine()
-        self.matching_engine.start()
+        self.matching_engine = matching_engine
 
-    def teardown_method(self):
-        """Stop the matching engine after each test."""
-        self.matching_engine.stop()
+    def teardown_method(self): ...
 
     async def test_add_limit_buy_order_no_match(
         self,
