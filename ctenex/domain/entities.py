@@ -211,6 +211,10 @@ class ProcessedOrder(BaseOrder):
         nullable=False,
         index=True,
     )
+    status: Mapped[OrderStatus] = mapped_column(
+        type_=String,
+        nullable=False,
+    )
 
 
 class HistoricOrder(ProcessedOrder):
