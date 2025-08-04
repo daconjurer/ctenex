@@ -32,6 +32,7 @@ pyright = "^1.1.396"
 coverage = "^7.6.12"
 pytest = "^8.3.5"
 httpx = "^0.28.1"
+pyyaml = "^6.0.2"
 
 
 [tool.poetry.group.trader.dependencies]
@@ -42,4 +43,5 @@ typer = "^0.15.3"
 [tool.poetry.group.bot.dependencies]
 httpx = "^0.28.1"
 pydantic = "^2.11.4"
-
+aiosqlite = "^0.21.0"
+typer = "^0.15.3"
